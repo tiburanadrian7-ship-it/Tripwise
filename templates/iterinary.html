@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trip Itinerary - TripWise</title>
+    <style>
+        body { font-family: Arial; background: #f9f9f9; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; border-radius: 10px; padding: 20px; }
+        h2 { color: #0077b6; }
+        img { width: 100%; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📍 {{ destination.name }}</h2>
+        <img src="{{ destination.image }}">
+        <p>{{ destination.description }}</p>
+
+        <h3>Trip Summary</h3>
+        <p><strong>Days:</strong> {{ days }}</p>
+        <p><strong>Total Budget:</strong> ₱{{ budget }}</p>
+        <p><strong>Estimated Daily Budget:</strong> ₱{{ "%.2f"|format(daily_budget) }}</p>
+
+        <h3>Suggested Attractions:</h3>
+        <ul>
+            {% for spot in destination.attractions %}
+            <li>{{ spot }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Suggested Restaurants:</h3>
+        <ul>
+            {% for food in destination.food %}
+            <li>{{ food }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Suggested Hotels:</h3>
+        <ul>
+            {% for hotel in destination.hotels %}
+            <li>{{ hotel }}</li>
+            {% endfor %}
+        </ul>
+
+        <a href="{{ url_for('home') }}">⬅ Back to Home</a>
+    </div>
+</body>
+</html>

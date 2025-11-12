@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TripWise - Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+    --primary: #0077b6;
+    --primary-dark: #023e8a;
+    --secondary: #00b4d8;
+    --bg-light: #f5f7fa;
+    --text-light: #ffffff;
+    --card-light: #ffffff;
+}
+
+/* General Styles */
+body { font-family: Arial, sans-serif; margin: 0; background: var(--bg-light); color: #000; transition: all 0.3s ease; }
+header { background: var(--primary); color: var(--text-light); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+
+/* Tab buttons */
+.tab-buttons { display: flex; justify-content: center; margin: 20px; gap: 15px; }
+.tab-buttons button { 
+    padding: 12px 30px; 
+    border: none; 
+    border-radius: 50px; 
+    cursor: pointer; 
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary)); 
+    color: var(--text-light); 
+    font-weight: bold; 
+    font-size: 16px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+    transition: all 0.3s ease; 
+}
+.tab-buttons button:hover { 
+    transform: translateY(-3px) scale(1.05); 
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25); 
+    background: linear-gradient(135deg, #005f8e, #0096c7); 
+}
+.tab-buttons button.active { 
+    background: linear-gradient(135deg, #0096c7, var(--secondary)); 
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3); 
+    transform: translateY(-2px) scale(1.05); 
+}
+
+.logout-btn {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.3s, color 0.3s;
+}
+.logout-btn:hover {
+    background: rgba(88, 190, 78, 0.2);
+    box-shadow: 0 4px 8px #00b4d8;
+    color: #100f0f;
+}
+
+/* Filter dropdown */
+#places-filter-container { text-align: center; margin-bottom: 15px; display: none; }
+#places-filter { padding: 5px 10px; border-radius: 5px; border: 1px solid #ccc; }
+
+/* Cards */
+.content { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; padding-bottom: 40px; }
+.card { width: 300px; background: var(--card-light); border-radius: 10px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center; transition: transform 0.2s ease; }
+.card:hover { transform: translateY(-5px);  box-shadow: 0 4px 8px #00b4d8;}
+img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; }
+.btn { display: inline-block; background: var(--primary); color: white; padding: 8px 12px; text-decoration: none; border-radius: 5px; margin-top: 10px; transition: background 0.3s; }
+.btn:hover { background: #005f8e; }
+.place-type { font-size: 14px; color: #555; margin-top: 5px; }
+
+/* Chatbot */
+.chat-container { position: fixed; bottom: 20px; right: 20px; width: 16.6vw; height: 90vh; min-width: 300px; min-height: 400px; background: var(--card-light); border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; z-index: 9999; }
+.chat-header { background: #0084ff; color: white; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+.chat-box { flex: 1; padding: 10px; overflow-y: auto; font-size: 14px; background: #fafafa; display: flex; flex-direction: column; }
+.message { margin: 5px 0; padding: 8px 12px; border-radius: 10px; max-width: 90%; word-wrap: break-word; line-height: 1.4; }
+.user { background: #0084ff; color: white; align-self: flex-end; }
+.bot { background: #e5e5ea; color: black; align-self: flex-start; }
+.input-area { display: flex; border-top: 1px solid #ccc; }
+input { flex: 1; border: none; padding: 10px; font-size: 14px; outline: none; background: #fff; color: #000; }
+button.send-btn { background: #0084ff; color: white; border: none; padding: 10px 15px; cursor: pointer; }
+button.send-btn:hover { background: #006fe6; }
+#open-chat-btn { position: fixed; bottom: 20px; right: 20px; background: #0084ff; color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; z-index: 9999; transition: background 0.3s; }
+#open-chat-btn:hover { background: #006fe6; }
+
+/* Styling for the horizontal scroll container */
+.horizontal-scroll-list {
+    display: flex;
+    overflow-x: auto; 
+    cursor: grab;
+    user-select: none;
+}
+
+/* Hide scrollbar for Chrome/Safari/Opera (for a cleaner look) */
+.horizontal-scroll-list::-webkit-scrollbar {
+    height: 5px; /* Makes scrollbar very thin */
+}
+.horizontal-scroll-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+.horizontal-scroll-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Styling for the small island cards */
+.island-card {
+    flex: 0 0 180px; /* Fixed width of 180px, prevents growth/shrinkage */
+    padding: 10px; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    background-color: #fff;
+}
+
+.island-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px #00b4d8;
+}
+
+.island-card img {
+    width: 100%;
+    height: 120px; 
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.card-content h3 {
+    font-size: 0.9em; 
+    margin: 0 0 5px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-content p {
+    font-size: 0.75em; 
+    color: #007bff;
+    font-weight: bold;
+}
+
+.rank-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px; 
+    background-color: #ffc107;
+    color: #333;
+    padding: 4px 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.8em;
+    z-index: 10;
+}
+/* Add this to your style.css */
+.top-islands-section {
+    text-align: center;
+    padding: 20px 0; 
+}
+
+/* Ensure the h2 styling doesn't override the centering */
+.top-islands-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px; 
+}
+/* Header Minimization and Centering */
+header {
+    padding: 8px 20px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    margin: 0; 
+}
+
+header h2 {
+    font-size: 1.2em; 
+    margin: 0; 
+}
+
+header div {
+    padding: 0;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.top-islands-section h2 {
+    font-size: 1.25em;
+    margin-top: 0; 
+    margin-bottom: 15px; 
+}
+
+/* Scroll List Styles (for mouse scroll and compact size) */
+.horizontal-scroll-list {
+    display: flex;
+    overflow-x: auto; 
+    padding: 10px 0; 
+    gap: 10px;
+    white-space: nowrap; 
+    scrollbar-width: thin; 
+}
+
+.island-card {
+    flex: 0 0 180px; 
+    padding: 10px; 
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.island-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.card-content h3 {
+    font-size: 0.9em; 
+    margin: 0 0 5px 0;
+}
+
+.card-content p {
+    font-size: 0.75em;
+    color: #007bff;
+}
+
+.rank-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px; 
+    background-color: #ffc107;
+    color: #333;
+    padding: 4px 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.8em;
+    z-index: 10;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>TripWise</h2>
+    <div>
+        Welcome, <b>{{ user }}</b> |
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+</header>
+<section class="top-islands-section">
+    <h2 id="top">🏆 Top 10 Most Visited Islands (2024)</h2>
+    <div class="horizontal-scroll-list">
+        {% for island in top_islands %}
+        <a href="{{ url_for('island_details', island_id=island.id) }}" class="island-card">
+            <div class="rank-badge">#{{ loop.index }}</div>
+            <img src="{{ url_for('static', filename='images/islands/' + island.image) }}" alt="{{ island.name }}">
+            <div class="card-content">
+                <h3>{{ island.name }}</h3>
+                <p>Visits: {{ "{:,.0f}".format(island.annual_visits) }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+<div class="tab-buttons">
+    <button class="active" id="islands-btn">🏝️ Islands</button>
+    <button id="places-btn">🗺️ Places</button>
+</div>
+
+<!-- Places filter -->
+<div id="places-filter-container">
+    <label for="places-filter">Filter by category:</label>
+    <select id="places-filter">
+        <option value="all">All</option>
+        <option value="hotel">Hotel</option>
+        <option value="restaurant">Restaurant</option>
+        <option value="bar">Bar</option>
+    </select>
+</div>
+
+<!-- Islands Section -->
+<div class="content" id="islands-content">
+    {% for island in islands %}
+    <div class="card">
+        <img src="{{ url_for('static', filename='images/islands/' ~ island.image) }}" alt="{{ island.name }}">
+        <h3>{{ island.name }}</h3>
+        <p>{{ island.description }}</p>
+        {% if island.latitude and island.longitude %}
+        <p style="font-size: 12px; color: #555;">Lat: {{ island.latitude }}, Lon: {{ island.longitude }}</p>
+        {% endif %}
+        <a class="btn" href="{{ url_for('island_details', island_id=island.id) }}">View Details</a>
+        <!-- Plan Trip button -->
+        <a class="btn" href="{{ url_for('plan_trip') }}?destination={{ island.id }}">🛫 Plan Trip</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Places Section -->
+<div class="content" id="places-content" style="display:none;">
+    {% for place in places %}
+    <div class="card place-card" data-category="{{ place.category|lower }}">
+        <img src="{{ url_for('static', filename='images/places/' ~ place.image) }}" alt="{{ place.name }}">
+        <h3>{{ place.name }}</h3>
+        <p class="place-type">Category: {{ place.category|capitalize }}</p>
+        <p>{{ place.description }}</p>
+        <a class="btn" href="{{ url_for('place_details', place_id=place.id) }}">View Details</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Chatbot -->
+<div class="chat-container" id="chat-container">
+  <div class="chat-header">
+    WiseBot Assistant
+    <div>
+      <button id="clear-btn" title="Clear chat">🗑️</button>
+      <button id="close-btn" title="Close chat">X</button>
+    </div>
+  </div>
+  <div id="chat-box" class="chat-box"></div>
+  <div class="input-area">
+    <input id="user-input" type="text" placeholder="Type a message...">
+    <button class="send-btn">Send</button>
+  </div>
+</div>
+
+<button id="open-chat-btn">WiseBot Chat</button>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const islandsBtn = document.getElementById("islands-btn");
+    const placesBtn = document.getElementById("places-btn");
+    const islandsContent = document.getElementById("islands-content");
+    const placesContent = document.getElementById("places-content");
+    const placesFilterContainer = document.getElementById("places-filter-container");
+    const placesFilter = document.getElementById("places-filter");
+
+    function activateTab(tab) {
+        if(tab === "places"){
+            islandsContent.style.display = "none";
+            placesContent.style.display = "flex";
+            placesBtn.classList.add("active");
+            islandsBtn.classList.remove("active");
+            placesFilterContainer.style.display = "block";
+        } else {
+            islandsContent.style.display = "flex";
+            placesContent.style.display = "none";
+            islandsBtn.classList.add("active");
+            placesBtn.classList.remove("active");
+            placesFilterContainer.style.display = "none";
+        }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get("tab");
+    activateTab(activeTab || "islands");
+
+    islandsBtn.addEventListener("click", () => activateTab("islands"));
+    placesBtn.addEventListener("click", () => activateTab("places"));
+
+    // Places filtering
+    placesFilter.addEventListener("change", () => {
+        const selected = placesFilter.value;
+        document.querySelectorAll(".place-card").forEach(card => {
+            if(selected === "all" || card.dataset.category === selected){
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    });
+
+    // Chatbot functionality
+    const chat = document.getElementById("chat-container");
+    const openBtn = document.getElementById("open-chat-btn");
+    const closeBtn = document.getElementById("close-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.querySelector(".send-btn");
+
+    chat.style.display = "none";
+
+    openBtn.addEventListener("click", () => {
+        chat.style.display = "flex";
+        openBtn.style.display = "none";
+        userInput.focus();
+    });
+
+    closeBtn.addEventListener("click", () => {
+        chat.style.display = "none";
+        openBtn.style.display = "block";
+    });
+
+    clearBtn.addEventListener("click", () => chatBox.innerHTML = "");
+
+    sendBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keydown", e => {
+        if(e.key === "Enter") sendMessage();
+    });
+
+    async function sendMessage() {
+        const msg = userInput.value.trim();
+        if(!msg) return;
+        userInput.value = "";
+        append(msg, "user");
+
+        try {
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: msg })
+            });
+            const data = await res.json();
+            let bot = data.response || "⚠️ No reply.";
+            bot = bot.replace(/\*\*(.*?)\*\*/g,"<b>$1</b>")
+                     .replace(/\*(.*?)\*/g,"<i>$1</i>")
+                     .replace(/\n/g,"<br>");
+            append(bot, "bot", true);
+        } catch {
+            append("⚠️ Network error. Please try again.", "bot");
+        }
+    }
+
+    function append(msg, who, html=false) {
+        const div = document.createElement("div");
+        div.className = `message ${who}`;
+        html ? div.innerHTML = msg : div.textContent = msg;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+});
+</script>
+
+</body>
+</html>

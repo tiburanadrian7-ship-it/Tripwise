@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ island.name }} - TripWise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 30px;
+}
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 25px 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+img.main-img {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+img.main-img:hover {
+    transform: scale(1.02);
+}
+h1 {
+    color: #0077b6;
+    margin-bottom: 5px;
+    text-align: center;
+}
+.location {
+    text-align: center;
+    color: #555;
+    margin-bottom: 15px;
+    font-size: 1em;
+}
+.description {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+.section {
+    margin-bottom: 25px;
+}
+.section h2 {
+    color: #023e8a;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #0077b6;
+    display: inline-block;
+    padding-bottom: 3px;
+}
+.section p {
+    color: #333;
+    line-height: 1.7;
+    margin-top: 0;
+    text-align: justify;
+}
+
+/* 3 per row responsive layout */
+.places-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.place-card {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 10px;
+    flex: 1 1 calc(33.333% - 10px); /* 3 per row */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s;
+    min-width: 250px;
+}
+.place-card:hover {
+    transform: translateY(-5px);
+}
+.place-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+.place-card h3 {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #0077b6;
+}
+.place-card p {
+    margin: 3px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+.btn {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 5px 10px;
+    background: #0077b6;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.85em;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+.btn:hover {
+    background: #005f8e;
+}
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #0077b6;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+.back-link:hover {
+    text-decoration: underline;
+    color: #005f8e;
+}
+
+/* Modal styles */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6); 
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; 
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%; 
+    max-width: 500px;
+    position: relative;
+    text-align: center;
+}
+.modal-content img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover {
+    color: #000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .place-card {
+        flex: 1 1 calc(50% - 10px); /* 2 per row on tablets */
+    }
+}
+@media (max-width: 600px) {
+    .place-card {
+        flex: 1 1 100%; /* 1 per row on mobile */
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <img class="main-img" src="{{ url_for('static', filename='images/islands/' ~ island.image) }}" alt="{{ island.name }}">
+    <h1>{{ island.name }}</h1>
+    <p class="location">📍 Latitude: {{ island.latitude }}, Longitude: {{ island.longitude }}</p>
+    <p class="description">{{ island.description }}</p>
+
+    <div class="section">
+        <h2>Full Details</h2>
+        <p>{{ island.details | safe }}</p>
+    </div>
+
+    <div class="section">
+        <h2>Location Map</h2>
+        <iframe
+            width="100%"
+            height="350"
+            frameborder="0"
+            style="border:0"
+            src="https://www.google.com/maps?q={{ island.latitude }},{{ island.longitude }}&hl=es;z=14&output=embed"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="section">
+        <h2>Nearby Hotels & Restaurants</h2>
+        <div class="places-container">
+            {% if places %}
+                {% for place in places %}
+                <div class="place-card">
+                    {% if place.image %}
+                    <img src="{{ url_for('static', filename='images/places/' ~ place.image) }}" alt="{{ place.name }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No image available">
+                    {% endif %}
+                    <h3>{{ place.name }}</h3>
+                    <p>Type: {{ place.category if place.category else 'N/A' }}</p>
+                    <p>Rating: {{ place.rating if place.rating else 'N/A' }}</p>
+                    <button class="btn" onclick="openModal({{ place.id }})">View Details</button>
+                </div>
+
+                <!-- Modal for this place -->
+                <div id="modal-{{ place.id }}" class="modal">
+                  <div class="modal-content">
+                    <span class="close" onclick="closeModal({{ place.id }})">&times;</span>
+                    {% if place.image %}
+                    <img src="{{ url_for('static', filename='images/places/' ~ place.image) }}" alt="{{ place.name }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No image available">
+                    {% endif %}
+                    <h3>{{ place.name }}</h3>
+                    <p>Type: {{ place.category if place.category else 'N/A' }}</p>
+                    <p>Rating: {{ place.rating if place.rating else 'N/A' }}</p>
+                    <p>{{ place.description if place.description else 'No description available' }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No nearby places found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+</div>
+
+<script>
+function openModal(id) {
+    document.getElementById('modal-' + id).style.display = 'block';
+}
+function closeModal(id) {
+    document.getElementById('modal-' + id).style.display = 'none';
+}
+// Close modal when clicking outside
+window.onclick = function(event) {
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+</script>
+
+</body>
+</html>

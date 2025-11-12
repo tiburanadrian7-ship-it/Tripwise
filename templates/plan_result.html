@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Trip Plan - {{ destination }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #0077b6;
+            margin-bottom: 5px;
+        }
+
+        .plan-summary {
+            text-align: center;
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .cost-summary {
+            background-color: #ffc107;
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .day-card {
+            background: #e1f5fe;
+            margin: 15px 0;
+            border-radius: 10px;
+            padding: 15px 20px;
+            line-height: 1.6;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .day-card h3 {
+            margin-top: 0;
+            color: #0288d1;
+            font-weight: bold;
+        }
+
+        /* NEW STYLING FOR NARRATIVE DAYS */
+        .day-story-card {
+            background: #ffffff; /* White background for story contrast */
+            border: 1px solid #0077b6; /* Blue border */
+            margin: 20px 0;
+            border-radius: 10px;
+            padding: 20px;
+            line-height: 1.8;
+            color: #1e3a5f; /* Darker text for readability */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .day-story-card strong.day-header {
+            display: block;
+            font-size: 1.4em;
+            color: #0077b6;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #0077b6;
+            padding-bottom: 5px;
+        }
+        
+        .day-story-card p {
+            white-space: pre-wrap; /* Preserves line breaks for narrative flow */
+        }
+        /* END NEW STYLING */
+
+        a.back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #0077b6;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Your Custom Trip Plan</h1>
+    <h2>{{ destination }}</h2>
+    <p class="plan-summary">{{ days }} Days | Budget Target: PHP {{ budget }}</p>
+
+    <div id="total-cost-display"></div>
+    <div id="itinerary-list">
+        <p id="loading-message">Analyzing AI itinerary...</p>
+    </div>
+
+    <div id="raw-itinerary" style="display:none;">{{ itinerary }}</div>
+
+    <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+</div>
+
+<script>
+    function cleanMarkdown(text) {
+        if (!text) return "";
+        let cleaned = text.replace(/(\*\*|__)/g, ''); // Remove general bolding/italics
+        cleaned = cleaned.replace(/^\s*[\-\+]\s/gm, '• '); // List markers
+        cleaned = cleaned.replace(/^#+\s/gm, ''); // Headings
+        return cleaned.trim();
+    }
+
+    function createNarrative(dayTitle, dayContent) {
+        // Simple narrative wrapper
+        let narrative = dayContent.split('\n\n').map(p => {
+            // Further clean up list items to use a consistent style
+            let formattedParagraph = cleanMarkdown(p.trim());
+            return formattedParagraph;
+        }).join('\n\n');
+
+        return `
+            <div class="day-story-card">
+                <strong class="day-header">Day ${dayTitle}</strong>
+                <p>${narrative}</p>
+            </div>
+        `;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const rawText = document.getElementById('raw-itinerary').textContent.trim();
+        const listDiv = document.getElementById('itinerary-list');
+        listDiv.innerHTML = ''; // Clear loading message
+
+        // 1. Extract total cost
+        const costRegex = /(total|estimated|overall)\s*cost.*?(php|₱)?\s*[\d,.]+/i;
+        const costMatch = rawText.match(costRegex);
+        if (costMatch) {
+            document.getElementById('total-cost-display').innerHTML =
+                `<div class="cost-summary">💰 ${costMatch[0].trim()} (Estimated)</div>`;
+        } else {
+            document.getElementById('total-cost-display').innerHTML =
+                `<div class="cost-summary" style="background-color:#f8d7da;color:#721c24;">Final Cost Not Found. Check itinerary details.</div>`;
+        }
+
+        // 2. Split content by Day markers
+        const dayRegex = /(Day\s+\d+)/gi; // Capture 'Day 1', 'Day 2', etc.
+        const parts = rawText.split(dayRegex);
+        
+        let currentDayTitle = '';
+
+        // Iterate through the parts (title, content, title, content...)
+        parts.forEach(part => {
+            part = part.trim();
+            if (!part) return;
+
+            if (part.match(dayRegex)) {
+                // This part is a day title (e.g., "Day 1")
+                currentDayTitle = part.replace(/[^0-9]/g, ''); // Extract just the number
+            } else if (currentDayTitle) {
+                // This part is the content for the current day
+                
+                // Add the content from the next line after the title
+                let content = part; 
+                
+                // Remove any cost summary or separator if it appears right after the day
+                content = content.replace(/Estimated Cost.*|Total for Fees & Boat.*|---|###/gi, '').trim();
+
+                if(content.length > 5) {
+                    listDiv.innerHTML += createNarrative(currentDayTitle, content);
+                }
+                currentDayTitle = ''; // Reset title
+            }
+        });
+
+        // 3. Fallback if no Day markers are found (in case of summary output)
+        if (listDiv.children.length === 0) {
+            listDiv.innerHTML = `<div class="day-story-card" style="background: #f0f8ff;">
+                <strong class="day-header">Trip Overview</strong>
+                <p>${cleanMarkdown(rawText)}</p>
+            </div>`;
+        }
+    });
+</script>
+</body>
+</html>

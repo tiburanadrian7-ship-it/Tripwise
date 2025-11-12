@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plan Your Trip - TripWise</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            padding: 30px;
+        }
+
+        form {
+            background: white;
+            padding: 25px 30px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0077b6;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        select[multiple] {
+            height: 120px;
+        }
+
+        button {
+            background: #0077b6;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        button:hover:not(:disabled) { /* Ensure hover works only when not disabled */
+            background: #005f8a;
+        }
+        
+        button:disabled {
+            background: #77a2bf;
+            cursor: not-allowed;
+        }
+
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .flash-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        p.back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        p.back-link a {
+            color: #0077b6;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        p.back-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- LOADING SCREEN STYLES --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white overlay */
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #0077b6; /* Blue spinner */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #0077b6;
+            font-weight: bold;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* --- END LOADING SCREEN STYLES --- */
+
+    </style>
+</head>
+<body>
+    
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <div class="loading-text">Generating your itinerary...</div>
+        <div class="loading-text" style="font-size:0.9em; font-weight: normal; margin-top: 5px;">This may take a moment.</div>
+    </div>
+    <h2>Plan Your Trip</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('plan_trip') }}" id="trip-plan-form">
+        <label for="destinations">Select Destination(s):</label>
+        <select name="destinations" id="destinations" required multiple>
+            {% for island in destinations %}
+                <option value="{{ island.id }}"
+                    {% if request.form.getlist('destinations') and (island.id|string) in request.form.getlist('destinations') %}
+                        selected
+                    {% endif %}
+                >{{ island.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="people">Number of People:</label>
+        <input type="number" name="people" id="people" placeholder="Enter number of people" required min="1"
+                value="{{ request.form.get('people', 1) }}">
+
+        <label for="budget">Budget per Person (PHP):</label>
+        <input type="number" name="budget" id="budget" placeholder="Enter budget per person" required min="100"
+                value="{{ request.form.get('budget', '') }}">
+
+        <label for="days">Number of Days:</label>
+        <input type="number" name="days" id="days" placeholder="Enter trip length" required min="1"
+                value="{{ request.form.get('days', '') }}">
+
+        <button type="submit" id="submit-button">Create Trip Plan</button>
+    </form>
+
+    <p class="back-link">
+        <a href="{{ url_for('home') }}">← Back to Home</a>
+    </p>
+
+    <script>
+        document.getElementById('trip-plan-form').addEventListener('submit', function() {
+            // 1. Show the loading overlay
+            document.getElementById('loading-overlay').style.display = 'flex';
+            
+            // 2. Disable the submit button to prevent double-submission
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creating...';
+        });
+    </script>
+
+</body>
+</html>
