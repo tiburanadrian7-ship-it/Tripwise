@@ -5,6 +5,7 @@ import google.generativeai as genai
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 import re
+from datetime import date 
 
 # ========== CONFIGURATION ==========
 load_dotenv()
@@ -21,102 +22,177 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URI", 'mysql+pymysql
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# ========== MODELS ==========
+# ========== MODELS (MATCHING SQL SCHEMA) ==========
+
 class User(db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    id = db.Column('user_id', db.Integer, primary_key=True)
+    name = db.Column('full_name', db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=True)
+    phone = db.Column(db.String(50), nullable=True)
+    password_hash = db.Column('password', db.String(255), nullable=True)
 
 class Island(db.Model):
     __tablename__ = 'islands'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    image = db.Column(db.String(100))
+    id = db.Column('island_id', db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    # FIX: Mapped to 'island_image' from previous step
+    image = db.Column('island_image', db.String(255), nullable=False)
     description = db.Column(db.Text)
-    details = db.Column(db.Text)
-    latitude = db.Column(db.Float)
-    longitude = db.Column(db.Float)
+    location = db.Column(db.String(255))
+    region = db.Column(db.String(100))
+    history = db.Column(db.Text) 
+    map_coordinates = db.Column(db.String(255))
+    
+    @property
+    def latitude(self):
+        if self.map_coordinates:
+            try:
+                return float(self.map_coordinates.split(',')[0].strip())
+            except:
+                return None
+        return None
+    
+    @property
+    def longitude(self):
+        if self.map_coordinates:
+            try:
+                return float(self.map_coordinates.split(',')[1].strip())
+            except:
+                return None
+        return None
 
-class Place(db.Model):
-    __tablename__ = 'places'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    image = db.Column(db.String(100))
+    @property
+    def details(self):
+        return self.history
+
+
+class Establishment(db.Model):
+    __tablename__ = 'establishments'
+    id = db.Column('establishment_id', db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    type = db.Column(db.Enum('hotel', 'bar', 'restaurant'), nullable=False) 
+    island_id = db.Column(db.Integer, db.ForeignKey('islands.island_id'))
+    
+    # NEW FIELDS ADDED FROM SCHEMA UPDATE
+    location = db.Column(db.String(255))
+    contact_number = db.Column(db.String(50))
+    opening_hours = db.Column(db.String(100))
     description = db.Column(db.Text)
-    category = db.Column(db.String(50))
-    island_id = db.Column(db.Integer, db.ForeignKey('islands.id'))
+    rating = db.Column(db.Float)
+    # CRITICAL FIX: Map the Python 'image' attribute to the SQL 'establishments_image' column
+    image = db.Column('establishments_image', db.String(255), nullable=False)
+    
+    @property
+    def category(self):
+        return self.type
+
 
 class Visit(db.Model):
     __tablename__ = 'visits'
-    id = db.Column(db.Integer, primary_key=True)
-    island_id = db.Column(db.Integer, db.ForeignKey('islands.id'), nullable=False)
-    visit_month = db.Column(db.Date, nullable=False)
-    total_visits = db.Column(db.Integer, nullable=False)
+    id = db.Column('visit_id', db.Integer, primary_key=True)
+    island_id = db.Column(db.Integer, db.ForeignKey('islands.island_id'), nullable=False)
+    visit_week = db.Column('visit_week', db.Date, nullable=False) 
+    visit_month = db.Column('visit_month', db.Date, nullable=False)
+    visit_year = db.Column('visit_year', db.Date, nullable=False)
+    total_visits = db.Column('total_visit', db.Integer, nullable=False)
     island = db.relationship('Island', backref='visits')
 
 
-# ========== DATABASE INIT ==========
+# ========== DATABASE INIT (Updated with new Establishment fields) ==========
 def init_db():
     print("Initializing MySQL Database...")
     try:
         with app.app_context():
-            db.create_all()
+            db.create_all() 
             print("✅ MySQL tables created or already exist.")
 
+            # --- Island Data ---
             if not Island.query.first():
-                # Corrected sample image names for the 3 sample islands
                 sample_islands = [
-                    Island(name='Hundred Islands, Pangasinan', image='hundred_islands.jpg', 
-                           description='124 islands with beaches, caves & marine life.',
-                           details='The Hundred Islands National Park features 124 islands...',
-                           latitude=16.27, longitude=120.03),
-                    Island(name='Governors Island', image='governor_island.jpg',
-                           description='Developed island with cottages and viewing decks.',
-                           details='Governors Island is developed for tourism...',
-                           latitude=16.268, longitude=120.039),
+                    Island(name='Alaminos Hundred Islands', image='hundred_islands.jpg', 
+                            description='Famous national park with over 100 islands',
+                            history='Protected area since 1940',
+                            location='Alaminos', region='Pangasinan',
+                            map_coordinates='16.1622,120.3621'), # ID 1
                     Island(name='Quezon Island', image='quezon_island.jpg',
-                           description='Picnic area, snorkeling, and swimming zones.',
-                           details='Quezon Island is known for its shallow waters...',
-                           latitude=16.2682, longitude=120.0405)
+                            description='Popular island for day trips',
+                            history='Named after President Quezon',
+                            location='Alaminos', region='Pangasinan',
+                            map_coordinates='16.1660,120.3640'), # ID 2
+                    Island(name='Imelda Island', image='imelda_island.jpg',
+                            description='Small lodging and beach',
+                            history='Named after Imelda Marcos',
+                            location='Alaminos', region='Pangasinan',
+                            map_coordinates='16.1680,120.3660') # ID 3
                 ]
                 db.session.add_all(sample_islands)
                 db.session.commit()
                 print("✅ Sample island data added.")
 
-            if not Place.query.first():
-                sample_places = [
-                    Place(name='Sunset View Hotel', image='sunset_hotel.jpg', description='Cozy hotel with a sea view.',
-                          category='hotel', island_id=1),
-                    Place(name='Island Bistro', image='island_bistro.jpg', description='Local seafood and Filipino dishes.',
-                          category='restaurant', island_id=1),
-                    Place(name='Seaside Inn', image='seaside_inn.jpg', description='Affordable accommodation near the beach.',
-                          category='hotel', island_id=2),
-                    Place(name='Pangasinan Grill', image='pangasinan_grill.jpg',
-                          description='Traditional Filipino cuisine.', category='restaurant', island_id=2)
+            # --- Establishment Data (Updated with image and other new fields) ---
+            if not Establishment.query.first():
+                sample_establishments = [
+                    Establishment(name='Quezon Beach Resort', description='Beachfront resort',
+                                    type='hotel', island_id=2, 
+                                    image='quezon_resort.jpg', # NEW FIELD
+                                    location='Quezon Island, Alaminos', # NEW FIELD
+                                    rating=4.5, opening_hours='24/7'), # NEW FIELD
+                    Establishment(name='Imelda Resort', description='Small cozy resort',
+                                    type='hotel', island_id=3,
+                                    image='imelda_resort.jpg', # NEW FIELD
+                                    location='Imelda Island, Alaminos', # NEW FIELD
+                                    rating=4.2, contact_number='09123456789'), # NEW FIELD
+                    Establishment(name='Island Bar & Grill', description='Beachside bar and restaurant',
+                                    type='bar', island_id=1,
+                                    image='island_bar.jpg', # NEW FIELD
+                                    location='Governor\'s Island, Alaminos', # NEW FIELD
+                                    opening_hours='10:00 AM - 10:00 PM', rating=4.0) # NEW FIELD
                 ]
-                db.session.add_all(sample_places)
+                db.session.add_all(sample_establishments)
                 db.session.commit()
-                print("✅ Sample place data added.")
+                print("✅ Sample establishment data added.")
+
+            # --- Visit Data ---
+            if not Visit.query.first():
+                def get_visit_data(island_id, week_day, total):
+                    return Visit(
+                        island_id=island_id, 
+                        visit_week=date(2025, 11, week_day), 
+                        visit_month=date(2025, 11, 1), 
+                        visit_year=date(2025, 1, 1), 
+                        total_visits=total
+                    )
+                
+                sample_visits = [
+                    get_visit_data(island_id=1, week_day=17, total=120),
+                    get_visit_data(island_id=2, week_day=17, total=95),
+                    get_visit_data(island_id=3, week_day=17, total=150),
+                    get_visit_data(island_id=1, week_day=10, total=130),
+                    get_visit_data(island_id=2, week_day=10, total=85),
+                    get_visit_data(island_id=3, week_day=10, total=160)
+                ]
+                db.session.add_all(sample_visits)
+                db.session.commit()
+                print("✅ Sample visit data added.")
             
         print("✅ Database OK")
     except Exception as e:
         print(f"Database Error: {e}")
-        print("ACTION NEEDED: Ensure MySQL/XAMPP is running and the 'tripwise' database exists.")
+        print("ACTION NEEDED: Ensure MySQL/XAMPP is running and the 'tripwise' database exists and credentials are correct.")
 
 
 init_db()
 
-# ========== CHATBOT ==========
+# ========== CHATBOT (Unchanged) ==========
 
 def get_db_context(user_message):
-    """Fetch relevant islands, places, and visit data for AI prompt."""
+    """Fetch relevant islands, establishments, and visit data for AI prompt."""
     
     islands = Island.query.filter(Island.name.ilike(f"%{user_message}%")).all()
-    places = Place.query.filter(
-        (Place.name.ilike(f"%{user_message}%")) |
-        (Place.category.ilike(f"%{user_message}%"))
+    establishments = Establishment.query.filter(
+        (Establishment.name.ilike(f"%{user_message}%")) |
+        (Establishment.type.ilike(f"%{user_message}%"))
     ).all()
 
     if not islands:
@@ -129,31 +205,28 @@ def get_db_context(user_message):
         for i in islands:
             context += f"- ID {i.id}: {i.name}: {i.description}. Location: lat {i.latitude}, lon {i.longitude}\n"
             
-    if places:
-        context += "Places info:\n"
-        for p in places:
-            # --- MODIFIED LOGIC START ---
+    if establishments:
+        context += "Establishment info:\n"
+        for p in establishments:
             if p.island_id is None:
                 island_name = "Not connected to any island"
             else:
-                # Only query the database if island_id is not None
                 island = Island.query.get(p.island_id)
-                # 'Unknown Island' handles cases where the ID exists but points to a deleted island
                 island_name = island.name if island else "Unknown Island (Invalid ID)"
             
+            # Uses property getter for category
             context += f"- {p.name} ({p.category}) at {island_name}: {p.description}\n"
-            # --- MODIFIED LOGIC END ---
             
     # Add Visit Data (Popularity Context)
     total_visits_data = db.session.query(
         Visit.island_id,
         db.func.sum(Visit.total_visits).label('annual_visits')
     ).filter(
-        Visit.visit_month.between('2024-01-01', '2024-12-31')
+        Visit.visit_month.between('2025-01-01', '2025-12-31') 
     ).group_by(Visit.island_id).order_by(db.desc('annual_visits')).all()
 
     if total_visits_data:
-        context += "\nIsland Popularity Context (Total Visits in 2024):\n"
+        context += "\nIsland Popularity Context (Total Visits in 2025):\n"
         for island_id, annual_visits in total_visits_data:
             island = Island.query.get(island_id)
             if island:
@@ -165,9 +238,9 @@ def get_db_context(user_message):
 def link_islands_places(text):
     """Replace island/place names in AI-generated text with clickable links."""
     islands = Island.query.all()
-    places = Place.query.all()
+    establishments = Establishment.query.all()
 
-    for obj_list, base_url in [(islands, '/island/'), (places, '/place/')]:
+    for obj_list, base_url in [(islands, '/island/'), (establishments, '/place/')]:
         sorted_list = sorted(obj_list, key=lambda x: len(x.name), reverse=True)
         for obj in sorted_list:
             pattern = r'\b' + re.escape(obj.name) + r'\b'
@@ -203,7 +276,7 @@ AI:
     except Exception as e:
         return jsonify({"response": f"⚠️ Chat error: {str(e)}"})
 
-# ========== ROUTES ==========
+# ========== ROUTES (Unchanged as they rely on the 'image' attribute, which is now mapped) ==========
 @app.route("/")
 def index():
     return redirect(url_for("login"))
@@ -214,10 +287,10 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
         pwd = request.form.get("password", "")
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email).first() 
         if user and check_password_hash(user.password_hash, pwd):
             session["user"] = email
-            flash(f"Welcome back, {user.name}!", "success")
+            flash(f"Welcome back, {user.name}!", "success") 
             return redirect(url_for("home"))
         flash("Invalid credentials (email or password)", "danger")
     return render_template("login.html")
@@ -274,14 +347,14 @@ def plan_trip():
             flash("Selected islands not found.", "danger")
             return redirect(url_for("plan_trip"))
 
-        places = Place.query.filter(Place.island_id.in_([i.id for i in selected_islands])).all()
+        establishments = Establishment.query.filter(Establishment.island_id.in_([i.id for i in selected_islands])).all()
         db_context = ""
         for island in selected_islands:
             db_context += f"Island: {island.name}\nDescription: {island.description}\nDetails: {island.details}\n\n"
-            island_places = [p for p in places if p.island_id == island.id]
-            if island_places:
+            island_establishments = [p for p in establishments if p.island_id == island.id]
+            if island_establishments:
                 db_context += "Places:\n"
-                for p in island_places:
+                for p in island_establishments:
                     db_context += f"- {p.name} ({p.category}): {p.description}\n"
             db_context += "\n"
 
@@ -330,26 +403,26 @@ def home():
         session.clear()
         return redirect(url_for("login"))
     
-    # Query to get Top 10 Islands by total 2024 visits
+    # Query to get Top 10 Islands by total 2025 visits
     top_islands_data = db.session.query(
         Island.id,
         Island.name,
-        Island.image,
+        Island.image, 
         db.func.sum(Visit.total_visits).label('annual_visits')
     ).join(Visit, Island.id == Visit.island_id).filter(
-        Visit.visit_month.between('2024-01-01', '2024-12-31')
+        Visit.visit_month.between('2025-01-01', '2025-12-31') 
     ).group_by(Island.id, Island.name, Island.image).order_by(
         db.desc('annual_visits')
     ).limit(10).all()
     
     islands = Island.query.all()
-    places = Place.query.all()
+    establishments = Establishment.query.all()
     
     return render_template(
         "home.html", 
         user=user_data.name, 
         islands=islands, 
-        places=places,
+        places=establishments,
         top_islands=top_islands_data 
     )
 
@@ -360,17 +433,18 @@ def island_details(island_id):
         return redirect(url_for("login"))
 
     island = Island.query.get_or_404(island_id)
-    places = Place.query.filter_by(island_id=island.id).all()
+    establishments = Establishment.query.filter_by(island_id=island.id).all()
 
-    return render_template("island_details.html", island=island, places=places)
+    return render_template("island_details.html", island=island, places=establishments)
 
 
 @app.route("/place/<int:place_id>")
 def place_details(place_id):
     if "user" not in session:
         return redirect(url_for("login"))
-    place = Place.query.get_or_404(place_id)
-    return render_template("place_details.html", place=place)
+    # The Establishment object now includes 'image', 'location', 'rating', etc.
+    establishment = Establishment.query.get_or_404(place_id)
+    return render_template("place_details.html", place=establishment)
 
 
 @app.route("/logout")

@@ -64,11 +64,45 @@ header { background: var(--primary); color: var(--text-light); padding: 15px 30p
 /* Cards */
 .content { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; padding-bottom: 40px; }
 .card { width: 300px; background: var(--card-light); border-radius: 10px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center; transition: transform 0.2s ease; }
-.card:hover { transform: translateY(-5px);  box-shadow: 0 4px 8px #00b4d8;}
+.card:hover { transform: translateY(-5px);  box-shadow: 0 4px 8px #00b4d8;}
 img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; }
 .btn { display: inline-block; background: var(--primary); color: white; padding: 8px 12px; text-decoration: none; border-radius: 5px; margin-top: 10px; transition: background 0.3s; }
 .btn:hover { background: #005f8e; }
 .place-type { font-size: 14px; color: #555; margin-top: 5px; }
+
+/* --- Star Rating Styles (Fractional Display with Number) --- */
+.rating-display {
+    display: flex; /* Centers the content */
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.rating-number {
+    font-size: 1em;
+    font-weight: bold;
+    color: #333; /* Dark color for the rating text (e.g., 4.2/5) */
+    margin-bottom: 3px;
+}
+/* Container for the 5-star shape */
+.stars-container {
+    position: relative;
+    display: inline-block;
+    font-size: 1.5em; /* Larger size for better fractional display */
+    color: #ccc; /* Color for the empty stars (gray) */
+    letter-spacing: 2px;
+}
+
+/* The element that is clipped to show the filled stars */
+.filled-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden; /* Key to cut off the stars */
+    white-space: nowrap;
+    color: gold; /* Color for the filled stars */
+}
+/* --- END Star Rating Styles --- */
 
 /* Chatbot */
 .chat-container { position: fixed; bottom: 20px; right: 20px; width: 16.6vw; height: 90vh; min-width: 300px; min-height: 400px; background: var(--card-light); border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; z-index: 9999; }
@@ -259,7 +293,7 @@ header div {
     </div>
 </header>
 <section class="top-islands-section">
-    <h2 id="top">🏆 Top 10 Most Visited Islands (2024)</h2>
+    <h2 id="top">🏆 Top 10 Most Visited Islands (2025)</h2> 
     <div class="horizontal-scroll-list">
         {% for island in top_islands %}
         <a href="{{ url_for('island_details', island_id=island.id) }}" class="island-card">
@@ -278,7 +312,6 @@ header div {
     <button id="places-btn">🗺️ Places</button>
 </div>
 
-<!-- Places filter -->
 <div id="places-filter-container">
     <label for="places-filter">Filter by category:</label>
     <select id="places-filter">
@@ -289,7 +322,6 @@ header div {
     </select>
 </div>
 
-<!-- Islands Section -->
 <div class="content" id="islands-content">
     {% for island in islands %}
     <div class="card">
@@ -300,18 +332,30 @@ header div {
         <p style="font-size: 12px; color: #555;">Lat: {{ island.latitude }}, Lon: {{ island.longitude }}</p>
         {% endif %}
         <a class="btn" href="{{ url_for('island_details', island_id=island.id) }}">View Details</a>
-        <!-- Plan Trip button -->
         <a class="btn" href="{{ url_for('plan_trip') }}?destination={{ island.id }}">🛫 Plan Trip</a>
     </div>
     {% endfor %}
 </div>
 
-<!-- Places Section -->
+
 <div class="content" id="places-content" style="display:none;">
     {% for place in places %}
     <div class="card place-card" data-category="{{ place.category|lower }}">
         <img src="{{ url_for('static', filename='images/places/' ~ place.image) }}" alt="{{ place.name }}">
         <h3>{{ place.name }}</h3>
+        
+        {% if place.rating is not none %}
+        <div class="rating-display">
+            <span class="rating-number">{{ "{:.1f}".format(place.rating) }}/5</span>
+            <div class="stars-container">
+                <span>★★★★★</span>
+                {% set rating_percentage = place.rating * 20 %}
+                <div class="filled-stars" style="width:{{ rating_percentage }}%;">
+                    <span>★★★★★</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <p class="place-type">Category: {{ place.category|capitalize }}</p>
         <p>{{ place.description }}</p>
         <a class="btn" href="{{ url_for('place_details', place_id=place.id) }}">View Details</a>
@@ -319,7 +363,7 @@ header div {
     {% endfor %}
 </div>
 
-<!-- Chatbot -->
+
 <div class="chat-container" id="chat-container">
   <div class="chat-header">
     WiseBot Assistant
