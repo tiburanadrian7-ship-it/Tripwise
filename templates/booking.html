@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Book {{ place.name }} - TripWise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* Basic Setup */
+body { 
+    font-family: Arial, sans-serif; 
+    background: #f5f7fa; 
+    margin: 0; 
+    padding: 0; 
+    color: #333;
+}
+header { 
+    background: #0077b6; 
+    color: white; 
+    padding: 15px 30px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+header h2 { margin: 0; }
+.header-link { 
+    color: white; 
+    text-decoration: none; 
+    padding: 5px 10px; 
+    border-radius: 5px; 
+    transition: background 0.3s; 
+}
+.header-link:hover { 
+    background: rgba(255, 255, 255, 0.2); 
+}
+
+/* Container and Form Styling */
+.container { 
+    max-width: 600px; 
+    margin: 40px auto; 
+    background: white; 
+    border-radius: 10px; 
+    padding: 30px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+}
+h1 { 
+    color: #0077b6; 
+    text-align: center; 
+    margin-bottom: 5px;
+}
+.subtitle {
+    text-align: center;
+    color: #555;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+/* Form Elements */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #023e8a;
+}
+input[type="text"], 
+input[type="email"], 
+input[type="date"], 
+input[type="number"],
+textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    
+}
+textarea {
+    resize: vertical; 
+}
+input:focus, textarea:focus {
+    border-color: #0077b6;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 119, 182, 0.5);
+}
+
+/* Two-column layout for dates */
+.date-group {
+    display: flex;
+    gap: 20px;
+}
+.date-group .form-group {
+    flex: 1;
+}
+
+/* Submit Button */
+.submit-btn { 
+    padding: 12px 20px; 
+    background: #0077b6; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background 0.3s, transform 0.1s;
+}
+.submit-btn:hover { 
+    background: #005f8e; 
+    transform: translateY(-1px);
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h2>TripWise</h2>
+    <div>
+        <a href="{{ url_for('home') }}" class="header-link">Home</a>
+    </div>
+</header>
+
+<div class="container">
+    <h1>Book Your Visit</h1>
+    <p class="subtitle">Booking for: <b>{{ place.name }}</b> ({{ place.category|capitalize }})</p>
+
+    <form method="POST" action="{{ url_for('book_place', place_id=place.id) }}">
+        
+        <input type="hidden" name="place_id" value="{{ place.id }}">
+        
+        <div class="form-group">
+            <label for="full_name">Full Name (Required)</label>
+            <input type="text" id="full_name" name="full_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address (Required)</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="date-group">
+            <div class="form-group">
+                <label for="check_in_date">Check-in / Start Date</label>
+                <input type="date" id="check_in_date" name="check_in_date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="check_out_date">Check-out / End Date</label>
+                <input type="date" id="check_out_date" name="check_out_date">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="guests">Number of Guests</label>
+            <input type="number" id="guests" name="guests" min="1" value="1" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="notes">Special Requests / Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="e.g., Dietary restrictions, seating preference..."></textarea>
+        </div>
+        
+        <button type="submit" class="submit-btn">Confirm Booking</button>
+        
+        <a class="header-link" style="text-align: center; color: #0077b6; margin-top: 10px;" href="{{ url_for('home') }}?tab=places">← Cancel and Go Back</a>
+    </form>
+</div>
+
+</body>
+</html>

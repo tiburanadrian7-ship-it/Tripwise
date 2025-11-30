@@ -359,6 +359,7 @@ header div {
         <p class="place-type">Category: {{ place.category|capitalize }}</p>
         <p>{{ place.description }}</p>
         <a class="btn" href="{{ url_for('place_details', place_id=place.id) }}">View Details</a>
+        <a class="btn" href="{{ url_for('book_place', place_id=place.id) }}">Book Now</a>
     </div>
     {% endfor %}
 </div>

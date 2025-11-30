@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import os
+from flask import Blueprint
 from dotenv import load_dotenv
 import google.generativeai as genai
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -134,20 +135,20 @@ def init_db():
             if not Establishment.query.first():
                 sample_establishments = [
                     Establishment(name='Quezon Beach Resort', description='Beachfront resort',
-                                    type='hotel', island_id=2, 
-                                    image='quezon_resort.jpg', # NEW FIELD
-                                    location='Quezon Island, Alaminos', # NEW FIELD
-                                    rating=4.5, opening_hours='24/7'), # NEW FIELD
+                                        type='hotel', island_id=2, 
+                                        image='quezon_resort.jpg', # NEW FIELD
+                                        location='Quezon Island, Alaminos', # NEW FIELD
+                                        rating=4.5, opening_hours='24/7'), # NEW FIELD
                     Establishment(name='Imelda Resort', description='Small cozy resort',
-                                    type='hotel', island_id=3,
-                                    image='imelda_resort.jpg', # NEW FIELD
-                                    location='Imelda Island, Alaminos', # NEW FIELD
-                                    rating=4.2, contact_number='09123456789'), # NEW FIELD
+                                        type='hotel', island_id=3,
+                                        image='imelda_resort.jpg', # NEW FIELD
+                                        location='Imelda Island, Alaminos', # NEW FIELD
+                                        rating=4.2, contact_number='09123456789'), # NEW FIELD
                     Establishment(name='Island Bar & Grill', description='Beachside bar and restaurant',
-                                    type='bar', island_id=1,
-                                    image='island_bar.jpg', # NEW FIELD
-                                    location='Governor\'s Island, Alaminos', # NEW FIELD
-                                    opening_hours='10:00 AM - 10:00 PM', rating=4.0) # NEW FIELD
+                                        type='bar', island_id=1,
+                                        image='island_bar.jpg', # NEW FIELD
+                                        location='Governor\'s Island, Alaminos', # NEW FIELD
+                                        opening_hours='10:00 AM - 10:00 PM', rating=4.0) # NEW FIELD
                 ]
                 db.session.add_all(sample_establishments)
                 db.session.commit()
@@ -183,6 +184,15 @@ def init_db():
 
 
 init_db()
+
+# ==========================================================
+# FIX: DEFINE THE MISSING HELPER FUNCTION HERE
+# ==========================================================
+def get_place_by_id(place_id):
+    """Fetches an Establishment object by its ID using Flask-SQLAlchemy."""
+    # Establishment is your model for places
+    return Establishment.query.get_or_404(place_id)
+# ==========================================================
 
 # ========== CHATBOT (Unchanged) ==========
 
@@ -452,6 +462,37 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
+@app.route('/book_place/<int:place_id>', methods=['GET', 'POST'])
+def book_place(place_id):
+    # This now correctly calls the defined function above
+    place = get_place_by_id(place_id) 
+    
+    # Check if the user is logged in
+    if "user" not in session:
+        flash("You must be logged in to make a booking.", "warning")
+        return redirect(url_for("login"))
+    
+    if request.method == 'POST':
+        # --- Handle Form Submission ---
+        user_name = request.form.get('full_name')
+        user_email = request.form.get('email')
+        check_in = request.form.get('check_in_date')
+        check_out = request.form.get('check_out_date')
+        guests = request.form.get('guests')
+        notes = request.form.get('notes')
+        
+        # In a real app, you would:
+        # 1. Validate data (e.g., check_in is before check_out, guests > 0)
+        # 2. Check availability
+        # 3. Create a Booking object in the database
+        
+        # --- Placeholder Success Logic ---
+        flash(f"Booking Request received for {place.name} for {guests} guests starting {check_in}!", 'success')
+        return redirect(url_for('home'))
+        
+    # Render the booking form
+    return render_template('booking.html', place=place)
 
 # ========== RUN ==========
 if __name__ == "__main__":
