@@ -4,52 +4,62 @@
 <meta charset="UTF-8">
 <title>{{ place.name }} - TripWise</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body { font-family: Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; }
-header { background: #0077b6; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-header h2 { margin: 0; }
-.container { max-width: 800px; margin: 40px auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; /* Center content in container */ }
-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 10px; }
-h1 { margin-top: 20px; margin-bottom: 5px; }
-p { line-height: 1.6; text-align: left; /* Align text details to the left */ }
-.label { font-weight: bold; color: #0077b6; }
-.back-btn { display: inline-block; margin-top: 20px; padding: 10px 15px; background: #0077b6; color: white; text-decoration: none; border-radius: 5px; transition: background 0.3s; }
-.back-btn:hover { background: #005f8e; }
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
 
-/* --- NEW Star Rating Styles (Fractional Display with Number) --- */
-.rating-display {
+/* Header */
+header {
+    background: #0077b6;
+    color: white;
+    padding: 15px 30px;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    margin-top: 5px;
-    margin-bottom: 15px; /* Add space before other details */
 }
-.rating-number {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 3px;
-}
-/* Container for the 5-star shape */
-.stars-container {
-    position: relative;
-    display: inline-block;
-    font-size: 1.8em; /* Made stars slightly larger */
-    color: #ccc;
-    letter-spacing: 2px;
-}
-/* The element that is clipped to show the filled stars */
-.filled-stars {
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    color: gold;
-}
-/* --- END NEW Star Rating Styles --- */
+header h2 { margin: 0; }
+header a { color: white; text-decoration: none; transition: 0.3s; }
+header a:hover { text-decoration: underline; }
 
-/* Fix for the back button placement */
+/* Container */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* Image */
+img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Headings & Paragraphs */
+h1 {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+p {
+    line-height: 1.6;
+    text-align: left;
+}
+.label {
+    font-weight: bold;
+    color: #0077b6;
+}
+
+/* Back button */
 .back-arrow {
     display: inline-block;
     margin-top: 20px;
@@ -58,8 +68,36 @@ p { line-height: 1.6; text-align: left; /* Align text details to the left */ }
     color: #0077b6;
     transition: color 0.3s;
 }
-.back-arrow:hover {
-    color: #005f8e;
+.back-arrow:hover { color: #005f8e; }
+
+/* --- Star Rating Styles --- */
+.rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+.rating-number {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 3px;
+}
+.stars-container {
+    position: relative;
+    display: inline-block;
+    font-size: 1.8em;
+    color: #ccc;
+    letter-spacing: 2px;
+}
+.filled-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    color: gold;
 }
 </style>
 </head>
@@ -68,7 +106,7 @@ p { line-height: 1.6; text-align: left; /* Align text details to the left */ }
 <header>
     <h2>TripWise</h2>
     <div>
-        <a href="{{ url_for('home') }}" style="color: white; text-decoration: none;">Home</a>
+        <a href="{{ url_for('home') }}">Home</a>
     </div>
 </header>
 
@@ -89,11 +127,12 @@ p { line-height: 1.6; text-align: left; /* Align text details to the left */ }
         </div>
     </div>
     {% endif %}
+
     <p><span class="label">Location:</span> {{ place.island.name if place.island else "Unknown" }}</p>
     <p><span class="label">Category:</span> {{ place.category|capitalize }}</p>
     <p><span class="label">Description:</span> {{ place.description }}</p>
 
-    <a class="back-arrow" href="{{ url_for('home') }}?tab=places">←Back</a>
+    <a class="back-arrow" href="{{ url_for('home') }}?tab=places">← Back</a>
 </div>
 
 </body>

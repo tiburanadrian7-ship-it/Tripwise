@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ destination.name }} - TripWise</title>
+    <style>
+        body { font-family: Arial; margin: 0; background: #f9f9f9; }
+        header { background: #0077b6; color: white; padding: 15px 30px; }
+        .container { max-width: 900px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; }
+        h2 { color: #0077b6; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>TripWise - {{ destination.name }}</h2>
+    </header>
+
+    <div class="container">
+        <img src="{{ destination.image }}" style="width:100%; border-radius:10px;">
+        <h2>{{ destination.name }}</h2>
+        <p>{{ destination.description }}</p>
+
+        <h3>🚗 Routes</h3>
+        <ul>{% for route in destination.routes %}<li>{{ route }}</li>{% endfor %}</ul>
+
+        <h3>🍽️ Food & Restaurants</h3>
+        <ul>{% for food in destination.food %}<li>{{ food }}</li>{% endfor %}</ul>
+
+        <h3>🏨 Hotels</h3>
+        <ul>{% for hotel in destination.hotels %}<li>{{ hotel }}</li>{% endfor %}</ul>
+
+        <h3>🏝️ Tourist Attractions</h3>
+        <ul>{% for spot in destination.attractions %}<li>{{ spot }}</li>{% endfor %}</ul>
+
+        <a href="{{ url_for('home') }}">⬅ Back to Home</a>
+    </div>
+</body>
+</html>

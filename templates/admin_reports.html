@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Reports & Analytics - TripWise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f4f6f9;
+    min-height: 100vh;
+}
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.navbar {
+    border-radius: 12px;
+}
+
+.summary-card {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.summary-card h4 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 28px;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container py-4">
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-primary px-3 mb-4">
+    <span class="navbar-brand mb-0 h5">📊 TripWise Reports Center</span>
+
+    <div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-light btn-sm me-2">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Card -->
+<div class="dashboard-card">
+
+<div class="mb-4">
+    <h2 class="dashboard-title">Reports & Analytics</h2>
+    <p class="text-muted">System insights and performance overview</p>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+
+<div class="col-md-4 mb-3">
+    <div class="summary-card bg-warning text-white">
+        <h4>{{ bookings_summary['pending'] }}</h4>
+        <p>Pending Bookings</p>
+    </div>
+</div>
+
+<div class="col-md-4 mb-3">
+    <div class="summary-card bg-success text-white">
+        <h4>{{ bookings_summary['confirmed'] }}</h4>
+        <p>Confirmed Bookings</p>
+    </div>
+</div>
+
+<div class="col-md-4 mb-3">
+    <div class="summary-card bg-danger text-white">
+        <h4>{{ bookings_summary['cancelled'] }}</h4>
+        <p>Cancelled Bookings</p>
+    </div>
+</div>
+
+</div>
+
+<hr>
+
+<!-- Analytics Tables -->
+<h4 class="section-title">🏝 Top 5 Islands (By Visitors)</h4>
+
+<div class="table-responsive mb-4">
+<table class="table table-hover align-middle">
+<thead class="table-light text-center">
+<tr>
+    <th>Island Name</th>
+    <th>Total Visitors</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for island, total in top_islands %}
+<tr>
+    <td>{{ island }}</td>
+    <td>{{ "{:,}".format(total) }}</td>
+</tr>
+
+{% else %}
+<tr>
+    <td colspan="2" class="text-center text-muted">No data available</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+<h4 class="section-title">🏨 Top 5 Establishments (By Bookings)</h4>
+
+<div class="table-responsive mb-4">
+<table class="table table-hover align-middle">
+<thead class="table-light text-center">
+<tr>
+    <th>Establishment Name</th>
+    <th>Total Bookings</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for est, total in top_establishments %}
+<tr>
+    <td>{{ est }}</td>
+    <td>{{ total }}</td>
+</tr>
+
+{% else %}
+<tr>
+    <td colspan="2" class="text-center text-muted">No data available</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+</div>
+
+<hr>
+
+<!-- Chart Section -->
+<h4 class="section-title text-center">📈 Bookings Status Overview</h4>
+
+<div class="d-flex justify-content-center">
+<canvas id="bookingsChart" style="max-width:350px"></canvas>
+</div>
+
+<script>
+const ctx = document.getElementById('bookingsChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Pending', 'Confirmed', 'Cancelled'],
+        datasets: [{
+            data: [
+                {{ bookings_summary['pending'] }},
+                {{ bookings_summary['confirmed'] }},
+                {{ bookings_summary['cancelled'] }}
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+
+<!-- Back Button -->
+<div class="text-end mt-4">
+<a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-sm">
+    ⬅ Back to Dashboard
+</a>
+</div>
+
+</div>
+</div>
+</div>
+
+</body>
+</html>

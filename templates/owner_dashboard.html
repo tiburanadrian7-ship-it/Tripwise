@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Owner Dashboard - TripWise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --main: #0077b6;
+    --accent: #00b4d8;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #eef2f7;
+    min-height: 100vh;
+}
+
+.owner-navbar {
+    background: linear-gradient(135deg, var(--main), var(--accent));
+    border-radius: 12px;
+}
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+}
+
+.dashboard-title {
+    font-weight: 600;
+    color: #023e8a;
+}
+
+.table th {
+    background-color: #f1f3f5;
+    font-weight: 500;
+}
+
+.btn {
+    border-radius: 10px;
+}
+
+.logout-link {
+    text-decoration: none;
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.9em;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container py-4">
+
+<!-- Navbar -->
+<nav class="owner-navbar navbar navbar-dark px-3 mb-4">
+    <span class="navbar-brand mb-0 h5">🏢 TripWise Owner Dashboard</span>
+</nav>
+
+<div class="dashboard-card">
+
+<!-- Header Section -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="dashboard-title">Owner Dashboard</h2>
+        <p class="text-muted mb-0">
+            Welcome, <strong>{{ owner.name }}</strong>
+        </p>
+    </div>
+
+    <div class="mt-2 mt-md-0">
+        <a href="{{ url_for('owner_bookings') }}" class="btn btn-success me-2">
+            📅 Manage Bookings
+        </a>
+
+        <a href="{{ url_for('logout') }}" class="logout-link">
+            Logout
+        </a>
+    </div>
+</div>
+
+<hr>
+
+<!-- Establishments Header -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-semibold">My Establishments</h4>
+
+    <a href="{{ url_for('add_establishment') }}" class="btn btn-primary btn-sm px-3">
+        ➕ Add Establishment
+    </a>
+</div>
+
+<!-- Establishments Table -->
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle">
+<thead>
+<tr>
+    <th>Name</th>
+    <th>Status</th>
+    <th class="text-center">Actions</th>
+</tr>
+</thead>
+
+<tbody>
+{% for est in establishments %}
+<tr>
+    <td>{{ est.name }}</td>
+
+    <td>
+        {% if est.is_approved %}
+            <span class="badge bg-success">Approved</span>
+        {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% endif %}
+    </td>
+
+    <td class="text-center">
+
+        <a href="{{ url_for('edit_establishment', id=est.establishment_id) }}"
+           class="btn btn-warning btn-sm me-2">
+            ✏ Edit
+        </a>
+
+        <form action="{{ url_for('delete_establishment', id=est.establishment_id) }}"
+              method="POST"
+              style="display:inline;">
+
+            <button type="submit"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Delete this establishment?');">
+                🗑 Delete
+            </button>
+        </form>
+
+    </td>
+</tr>
+
+{% else %}
+<tr>
+    <td colspan="3" class="text-center text-muted">
+        No establishments found.
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</form>
+
+</div>
+
+<p class="footer">
+    © 2026 TripWise – Smart Travel Planning System
+</p>
+
+</div>
+</div>
+
+</body>
+</html>

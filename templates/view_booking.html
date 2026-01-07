@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .view-card {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+
+        .header-section { text-align: center; margin-bottom: 25px; }
+        .header-section h2 { margin: 0; color: #2d3748; }
+        .header-section p { color: #0d6efd; margin: 5px 0; font-weight: 500; }
+
+        .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .form-group { flex: 1; margin-bottom: 15px; }
+
+        label {
+            display: block;
+            font-size: 11px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            color: #a0aec0;
+            text-transform: uppercase;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            font-size: 14px;
+            background-color: #f8fafc;
+            color: #2d3748;
+            /* Changed cursor to pointer for the readonly text if you want it selectable, 
+               otherwise 'default' is fine */
+            cursor: default; 
+            font-family: inherit;
+        }
+
+        /* ONLY DRAG DOWNWARD FIX */
+        textarea {
+            resize: vertical; /* Limits resizing to the Y-axis only */
+            min-height: 100px; /* Prevents it from being too small */
+            max-height: 400px; /* Optional: prevents it from breaking the page layout */
+            display: block;
+        }
+
+        /* Action Buttons Area */
+        .view-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f4f8;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-edit { background: #fff3cd; color: #856404; }
+        .btn-edit:hover { background: #ffe69c; transform: translateY(-1px); }
+
+        .btn-delete { background: #f8d7da; color: #842029; }
+        .btn-delete:hover { background: #f1aeb5; transform: translateY(-1px); }
+
+        .btn-back {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #718096;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        
+        .btn-back:hover { color: #2d3748; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="view-card">
+    <div class="header-section">
+        <h2>Booking Details</h2>
+        <p>📍 {{ place.name }}</p>
+    </div>
+
+    <div class="form-group">
+        <label>Establishment Type</label>
+        <input type="text" value="{{ place.type|capitalize }}" readonly>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label>Check-in</label>
+            <input type="text" value="{{ booking.check_in_date }}" readonly>
+        </div>
+        <div class="form-group">
+            <label>Check-out</label>
+            <input type="text" value="{{ booking.check_out_date }}" readonly>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label>Guests</label>
+            <input type="text" value="{{ booking.guests }}" readonly>
+        </div>
+        <div class="form-group">
+            <label>Current Status</label>
+            <input type="text" value="{{ booking.status|capitalize }}" readonly 
+                   style="font-weight: 600; color: #0d6efd;">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Notes</label>
+        <textarea readonly>{{ booking.notes if booking.notes else 'No notes provided.' }}</textarea>
+    </div>
+
+    <div class="view-actions">
+        <a href="{{ url_for('edit_booking', booking_id=booking.booking_id) }}" class="btn btn-edit">
+            ✏️ Edit Details
+        </a>
+
+        <form action="{{ url_for('delete_booking', booking_id=booking.booking_id) }}" method="POST" style="flex:1;">
+            <button type="submit" class="btn btn-delete" style="width:100%;" 
+                    onclick="return confirm('Are you sure you want to cancel this booking?')">
+                🗑️ Delete Trip
+            </button>
+        </form>
+    </div>
+
+    <a href="{{ url_for('my_bookings') }}" class="btn-back">⬅ Return to List</a>
+</div>
+
+</body>
+</html>

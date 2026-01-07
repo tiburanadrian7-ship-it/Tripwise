@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Chatbox</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css.css') }}">
+  <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
+</head>
+<body>
+
+  <!-- Chatbox -->
+  <div class="chat-container" id="chat-container">
+    <div class="chat-header">
+  WiseBot Assistant
+  <div>
+    <button id="clear-btn">🗑️</button>
+    <button id="close-btn">X</button>
+  </div>
+</div>
+    <div id="chat-box" class="chat-box"></div>
+    <div class="input-area">
+      <input id="user-input" type="text" placeholder="Type a message..." />
+      <button class="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <button id="open-chat-btn" onclick="openChat()">WiseBot Chat</button>
+
+</body>
+</html>

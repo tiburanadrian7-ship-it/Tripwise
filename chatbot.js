@@ -74,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
       appendMessage("⚠️ Error contacting server.", "bot");
     }
   }
+  
 
   //message to chat
   function appendMessage(message, sender, isHTML = false) {

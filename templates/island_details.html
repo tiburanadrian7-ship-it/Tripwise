@@ -1,272 +1,335 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>{{ island.name }} - TripWise</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "layout.html" %}
+
+{% block title %}{{ island.name }} - TripWise{% endblock %}
+
+{% block content %}
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    margin: 0;
-    padding: 30px;
-}
-.container {
-    max-width: 900px;
-    margin: auto;
-    background: white;
-    padding: 25px 35px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-img.main-img {
-    width: 100%;
-    height: 450px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    transition: transform 0.3s ease;
-}
-img.main-img:hover {
-    transform: scale(1.02);
-}
-h1 {
-    color: #0077b6;
-    margin-bottom: 5px;
-    text-align: center;
-}
-.location {
-    text-align: center;
-    color: #555;
-    margin-bottom: 15px;
-    font-size: 1em;
-}
-.description {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-bottom: 20px;
-}
-.section {
-    margin-bottom: 25px;
-}
-.section h2 {
-    color: #023e8a;
-    margin-bottom: 10px;
-    border-bottom: 2px solid #0077b6;
-    display: inline-block;
-    padding-bottom: 3px;
-}
-.section p {
-    color: #333;
-    line-height: 1.7;
-    margin-top: 0;
-    text-align: justify;
-}
+    .island-detail-body {
+        background: #f5f7fa;
+        padding: 30px 0;
+        min-height: 100vh;
+    }
+    .container-custom {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 25px 35px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 1;
+    }
+    img.main-img {
+        width: 100%;
+        height: 450px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+    h1 {
+        color: #0077b6;
+        margin-bottom: 5px;
+        text-align: center;
+        font-weight: 700;
+    }
+    .location {
+        text-align: center;
+        color: #555;
+        margin-bottom: 15px;
+        font-size: 1em;
+    }
+    .description-text {
+        text-align: center;
+        font-weight: 500;
+        font-size: 1.1em;
+        margin-bottom: 30px;
+        color: #444;
+    }
+    .section {
+        margin-bottom: 35px;
+    }
+    .section h2 {
+        color: #023e8a;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #0077b6;
+        display: inline-block;
+        padding-bottom: 3px;
+        font-size: 1.5rem;
+    }
 
-/* 3 per row responsive layout */
-.places-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-.place-card {
-    background: #f9f9f9;
-    border-radius: 10px;
-    padding: 10px;
-    flex: 1 1 calc(33.333% - 10px); /* 3 per row */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    text-align: center;
-    transition: transform 0.2s;
-    min-width: 250px;
-}
-.place-card:hover {
-    transform: translateY(-5px);
-}
-.place-card img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-.place-card h3 {
-    margin: 5px 0;
-    font-size: 1em;
-    color: #0077b6;
-}
-.place-card p {
-    margin: 3px 0;
-    font-size: 0.9em;
-    color: #555;
-}
-.btn {
-    display: inline-block;
-    margin-top: 5px;
-    padding: 5px 10px;
-    background: #0077b6;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 0.85em;
-    transition: background 0.3s;
-    cursor: pointer;
-}
-.btn:hover {
-    background: #005f8e;
-}
-.back-link {
-    display: inline-block;
-    margin-top: 20px;
-    color: #0077b6;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s;
-}
-.back-link:hover {
-    text-decoration: underline;
-    color: #005f8e;
-}
+    /* --- Activities Styling --- */
+    .activity-list {
+        margin-top: 15px;
+    }
+    .activity-item {
+        background: #fff;
+        border: 1px solid #e1e8ed;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    .activity-info h4 {
+        margin: 0;
+        color: #023e8a;
+        font-size: 1.1rem;
+    }
+    .activity-info p {
+        margin: 5px 0 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    .price-tag {
+        font-weight: 800;
+        color: #20c997;
+        font-size: 1.1rem;
+    }
 
-/* Modal styles */
-.modal {
-    display: none; 
-    position: fixed; 
-    z-index: 1000; 
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    overflow: auto; 
-    background-color: rgba(0,0,0,0.6); 
-}
+    /* --- Single Book Adventure Button --- */
+    .booking-action-container {
+        text-align: center;
+        margin-top: 20px;
+        padding: 20px;
+        background: #f0f9ff;
+        border-radius: 12px;
+    }
+    .btn-book-adventure {
+        padding: 12px 35px;
+        background: #0077b6;
+        color: white;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 119, 182, 0.2);
+    }
+    .btn-book-adventure:hover {
+        background: #023e8a;
+        transform: scale(1.05);
+        color: white;
+    }
+
+    /* --- Places Styling --- */
+    .places-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .place-card {
+        background: #fff;
+        border: 1px solid #e1e8ed;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+    .place-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border-color: #0077b6;
+    }
+    .place-card img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+
+    /* --- Back Button Styling --- */
+    .back-navigation {
+        margin-top: 40px;
+        padding-top: 25px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: center;
+    }
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 28px;
+        background: transparent;
+        color: #0077b6;
+        border: 2px solid #0077b6;
+        border-radius: 50px;
+        text-decoration: none !important;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-back:hover {
+        background: #0077b6;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .btn-back:hover .back-icon {
+        transform: translateX(-5px);
+    }
+
+    /* --- Modal --- */
+    .modal {
+        display: none; 
+        position: fixed; 
+        z-index: 9999;
+        left: 0; top: 0;
+        width: 100%; height: 100%; 
+        background-color: rgba(0,0,0,0.7);
+        backdrop-filter: blur(4px);
+    }
+    /* --- Modal Positioning Fix --- */
 .modal-content {
-    background-color: #fefefe;
-    margin: 10% auto; 
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%; 
+    background-color: #fff;
+    margin: 5% auto; 
+    border-radius: 15px;
+    width: 90%; 
     max-width: 500px;
-    position: relative;
-    text-align: center;
+    overflow: hidden;
+    position: relative; /* This is the anchor for the X button */
+    animation: modalFadeIn 0.3s ease;
 }
-.modal-content img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 15px;
-}
-.close {
-    color: #aaa;
+
+.close-modal {
+    color: #333; /* Darker color so it's visible against the white/image */
     position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 28px;
+    top: 10px; 
+    right: 15px;
+    font-size: 30px;
     font-weight: bold;
+    line-height: 1;
     cursor: pointer;
-}
-.close:hover {
-    color: #000;
+    z-index: 100; /* Ensures it stays above the image */
+    background: rgba(255, 255, 255, 0.7); /* Light circle background for visibility */
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
-    .place-card {
-        flex: 1 1 calc(50% - 10px); /* 2 per row on tablets */
-    }
+.close-modal:hover {
+    background: #ff4d4d;
+    color: white;
 }
-@media (max-width: 600px) {
-    .place-card {
-        flex: 1 1 100%; /* 1 per row on mobile */
-    }
-}
+    .modal-body { padding: 25px; }
+    
 </style>
-</head>
-<body>
 
-<div class="container">
-    <img class="main-img" src="{{ url_for('static', filename='images/islands/' ~ island.image) }}" alt="{{ island.name }}">
-    <h1>{{ island.name }}</h1>
-    <p class="location">📍 Latitude: {{ island.latitude }}, Longitude: {{ island.longitude }}</p>
-    <p class="description">{{ island.description }}</p>
+<div class="island-detail-body">
+    <div class="container container-custom">
+        <img class="main-img" src="{{ url_for('static', filename='images/islands/' ~ island.image) }}" alt="{{ island.name }}">
+        <h1>{{ island.name }}</h1>
+        <p class="location">📍 Alaminos City, Pangasinan</p>
+        <p class="description-text">{{ island.description }}</p>
 
-    <div class="section">
-        <h2>Full Details</h2>
-        <p>{{ island.details | safe }}</p>
-    </div>
+        <div class="section">
+            <h2>About the Island</h2>
+            <p>{{ island.details | safe }}</p>
+        </div>
+        <div class="section">
+            <h2>Location Map</h2>
+            <iframe width="100%" height="350" frameborder="0" style="border:0; border-radius: 10px;"
+                src="https://maps.google.com/maps?q={{ island.latitude }},{{ island.longitude }}&t=k&hl=en&z=14&output=embed"
+                allowfullscreen></iframe>
+        </div>
+        <div class="section">
+            <h2>Available Activities</h2>
+            <div class="activity-list">
+                {% if activities %}
+                    {% for act in activities %}
+                        <div class="activity-item">
+                            <div class="activity-info">
+                                <h4>{{ act.name }}</h4>
+                                <p>{{ act.description }}</p>
+                            </div>
+                            <div class="activity-price">
+                                <span class="price-tag">₱{{ "{:,.2f}".format(act.price|float) }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="booking-action-container">
+                        <p class="text-muted" style="margin-bottom: 10px;">Ready for an unforgettable experience?</p>
+                        <a href="{{ url_for('plan_trip') }}?destination={{ island.id }}" class="btn-book-adventure">Book Adventure Now</a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-light border text-muted">
+                        <p class="m-0">🏝️ No specific activities listed for {{ island.name }} yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-    <div class="section">
-        <h2>Location Map</h2>
-        <iframe
-            width="100%"
-            height="350"
-            frameborder="0"
-            style="border:0"
-            src="https://www.google.com/maps?q={{ island.latitude }},{{ island.longitude }}&hl=es;z=14&output=embed"
-            allowfullscreen>
-        </iframe>
-    </div>
+        <div class="section">
+            <h2>Nearby Hotels & Restaurants</h2>
+            <div class="places-container">
+                {% if places %}
+                    {% for place in places %}
+                    <div class="place-card">
+                        <div>
+                            <img src="{{ url_for('static', filename='images/establishments/' ~ place.establishments_image) if place.establishments_image else url_for('static', filename='images/placeholder.png') }}" alt="{{ place.name }}">
+                            <h3>{{ place.name }}</h3>
+                            <p class="text-muted"><small>{{ place.type | capitalize }}</small></p>
+                            <p style="color: #f39c12;">Rating: {{ place.rating if place.rating else 'N/A' }} ⭐</p>
+                        </div>
+                        <button class="btn-book-adventure" style="font-size: 0.85rem; padding: 8px; width: 100%;" onclick="openModal({{ place.id }})">View Details</button>
+                    </div>
 
-    <div class="section">
-        <h2>Nearby Hotels & Restaurants</h2>
-        <div class="places-container">
-            {% if places %}
-                {% for place in places %}
-                <div class="place-card">
-                    {% if place.image %}
-                    <img src="{{ url_for('static', filename='images/places/' ~ place.image) }}" alt="{{ place.name }}">
-                    {% else %}
-                    <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No image available">
-                    {% endif %}
-                    <h3>{{ place.name }}</h3>
-                    <p>Type: {{ place.category if place.category else 'N/A' }}</p>
-                    <p>Rating: {{ place.rating if place.rating else 'N/A' }}</p>
-                    <button class="btn" onclick="openModal({{ place.id }})">View Details</button>
-                </div>
-
-                <!-- Modal for this place -->
-                <div id="modal-{{ place.id }}" class="modal">
-                  <div class="modal-content">
-                    <span class="close" onclick="closeModal({{ place.id }})">&times;</span>
-                    {% if place.image %}
-                    <img src="{{ url_for('static', filename='images/places/' ~ place.image) }}" alt="{{ place.name }}">
-                    {% else %}
-                    <img src="{{ url_for('static', filename='images/placeholder.png') }}" alt="No image available">
-                    {% endif %}
-                    <h3>{{ place.name }}</h3>
-                    <p>Type: {{ place.category if place.category else 'N/A' }}</p>
-                    <p>Rating: {{ place.rating if place.rating else 'N/A' }}</p>
-                    <p>{{ place.description if place.description else 'No description available' }}</p>
-                  </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p>No nearby places found.</p>
-            {% endif %}
+                   <div id="modal-{{ place.id }}" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal({{ place.id }})">&times;</span>
+        
+        <img src="{{ url_for('static', filename='images/establishments/' ~ place.establishments_image) if place.establishments_image else url_for('static', filename='images/placeholder.png') }}" 
+             style="width:100%; height:250px; object-fit:cover;">
+        
+        <div class="modal-body">
+            <h3 style="color:#0077b6; margin-top: 0;">{{ place.name }}</h3>
+            <hr>
+            <p><b>Category:</b> {{ place.type | capitalize }}</p>
+            <p><b>Location:</b> {{ place.location if place.location else 'On Island' }}</p>
+            <p>{{ place.description if place.description else 'Experience the best of ' ~ place.name ~ ' on ' ~ island.name ~ '.' }}</p>
+            
+            <div style="margin-top: 25px;">
+                <a href="{{ url_for('book_place', place_id=place.id) }}" class="btn-book-adventure" style="display:block; text-align:center;">Book a Reservation</a>
+            </div>
         </div>
     </div>
+</div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-light border text-muted w-100">
+                        <p class="m-0">No nearby places found for this island.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-    <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+        <div class="back-navigation">
+            <a href="{{ url_for('home') }}" class="btn-back">
+                <span class="back-icon">←</span>
+                <span class="back-text">Back to Explore Islands</span>
+            </a>
+        </div>
+    </div>
 </div>
 
 <script>
-function openModal(id) {
-    document.getElementById('modal-' + id).style.display = 'block';
-}
-function closeModal(id) {
-    document.getElementById('modal-' + id).style.display = 'none';
-}
-// Close modal when clicking outside
-window.onclick = function(event) {
-    var modals = document.querySelectorAll('.modal');
-    modals.forEach(function(modal) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    });
-}
+function openModal(id) { document.getElementById('modal-' + id).style.display = 'block'; }
+function closeModal(id) { document.getElementById('modal-' + id).style.display = 'none'; }
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) { event.target.style.display = "none"; }
+});
 </script>
-
-</body>
-</html>
+{% endblock %}

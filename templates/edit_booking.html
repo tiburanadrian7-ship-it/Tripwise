@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Booking - TripWise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* CRITICAL FIX: Ensures padding doesn't push elements outside the card */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .edit-card {
+            background: white;
+            width: 100%;
+            max-width: 480px;
+            /* Uniform padding on all sides */
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+
+        .edit-card h2 {
+            color: #0d6efd;
+            margin: 0 0 8px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .edit-card p.subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            width: 100%; /* Ensures group takes full width */
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        input, textarea {
+            /* Now perfectly aligned with 'border-box' */
+            width: 100%; 
+            padding: 14px;
+            border: 2px solid #edf2f7;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #2d3748;
+            background-color: #fcfcfc;
+            display: block;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #0d6efd;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+        }
+
+        textarea {
+            resize: vertical; /* Only drag downward */
+            min-height: 110px;
+            max-height: 400px;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 16px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #084298;
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #a0aec0;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="edit-card">
+    <h2>Update Booking</h2>
+    <p class="subtitle">Refine your travel plans and save the changes</p>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label>Check-in Date</label>
+            <input type="date" name="check_in_date" value="{{ booking.check_in_date }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Check-out Date</label>
+            <input type="date" name="check_out_date" value="{{ booking.check_out_date }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Number of Guests</label>
+            <input type="number" name="guests" value="{{ booking.guests }}" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label>Special Notes</label>
+            <textarea name="notes" placeholder="Mention any preferences here...">{{ booking.notes }}</textarea>
+        </div>
+
+        <button type="submit" class="btn-save">💾 Save Changes</button>
+        <a href="{{ url_for('my_bookings') }}" class="btn-cancel">Dismiss and Go Back</a>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Travel History - TripWise</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f7fa;
+            padding: 30px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        h2 {
+            color: #0077b6;
+            margin-bottom: 15px;
+        }
+        .trip-card {
+            border-left: 4px solid #0077b6;
+            background: #eef8ff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        .trip-card h3 {
+            margin: 0;
+            color: #023e8a;
+        }
+        .trip-card p {
+            margin: 4px 0;
+            font-size: 0.95em;
+        }
+        a.view-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: white;
+            background: #0077b6;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📜 Your Travel History</h2>
+
+    {% if trips %}
+        {% for trip in trips %}
+        <div class="trip-card">
+            <h3>{{ trip.destination }}</h3>
+            <p><strong>Days:</strong> {{ trip.days }}</p>
+            <p><strong>Budget per Person:</strong> ₱{{ trip.budget }}</p>
+            <p><strong>People:</strong> {{ trip.people }}</p>
+            <p><strong>Date Generated:</strong> {{ trip.created_at.strftime("%B %d, %Y - %I:%M %p") }}</p>
+
+            <a class="view-link" href="{{ url_for('view_history_trip', trip_id=trip.id) }}">
+                View Trip Details
+            </a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>You have no travel plans yet.</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

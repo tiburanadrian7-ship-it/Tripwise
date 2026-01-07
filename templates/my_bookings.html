@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Bookings</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 30px;
+            color: #212529;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .back-link {
+            text-decoration: none;
+            background: #0d6efd;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            background: #084298;
+        }
+
+        /* Booking Cards */
+        .bookings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 35px rgba(0,0,0,0.12);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0d6efd;
+        }
+
+        .card p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+
+        /* Status Badge */
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .pending { background: #fff3cd; color: #856404; }
+        .approved { background: #cfe2ff; color: #084298; }
+        .confirmed { background: #d1e7dd; color: #0f5132; }
+        .cancelled { background: #f8d7da; color: #842029; }
+
+        /* ACTION BUTTONS STYLE */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-action {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 10px 5px;
+            border-radius: 8px;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-view { background: #e7f1ff; color: #0d6efd; }
+        .btn-view:hover { background: #0d6efd; color: white; }
+
+        .btn-edit { background: #fff3cd; color: #856404; }
+        .btn-edit:hover { background: #ffc107; color: white; }
+
+        .btn-delete { background: #f8d7da; color: #842029; }
+        .btn-delete:hover { background: #dc3545; color: white; }
+
+        /* Empty State */
+        .empty {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h2>📖 My Bookings</h2>
+    <a href="{{ url_for('home') }}" class="back-link">⬅ Back to Home</a>
+</div>
+
+{% if bookings %}
+<div class="bookings-container">
+    {% for booking, place in bookings %}
+    <div class="card">
+        <h3>{{ place.name }}</h3>
+        <p><strong>Type:</strong> {{ place.type|capitalize }}</p>
+        <p><strong>Check-in:</strong> {{ booking.check_in_date if booking.check_in_date else 'N/A' }}</p>
+        <p><strong>Check-out:</strong> {{ booking.check_out_date if booking.check_out_date else 'N/A' }}</p>
+        <p><strong>Guests:</strong> {{ booking.guests if booking.guests else '0' }}</p>
+        <p>
+            <strong>Status:</strong>
+            <span class="status {{ booking.status }}">
+                {{ booking.status.replace('_', ' ') }}
+            </span>
+        </p>
+
+        <div class="card-actions">
+            <a href="{{ url_for('view_booking', booking_id=booking.booking_id) }}" class="btn-action btn-view">
+                👁️ View
+            </a>
+            
+            <a href="{{ url_for('edit_booking', booking_id=booking.booking_id) }}" class="btn-action btn-edit">
+                ✏️ Edit
+            </a>
+            
+            <form action="{{ url_for('delete_booking', booking_id=booking.booking_id) }}" method="POST" style="flex: 1; display: flex;">
+                <button type="submit" class="btn-action btn-delete" style="width: 100%;" 
+                        onclick="return confirm('Are you sure you want to cancel this booking?')">
+                    🗑️ Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+    <p>No bookings yet.</p>
+</div>
+{% endif %}
+
+</body>
+</html>
